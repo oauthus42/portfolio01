@@ -1,3 +1,4 @@
+import { json } from "express";
 import { generateTokenAndSetCookie } from "../lib/utils/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
@@ -7,6 +8,7 @@ export const sugnup = async (req, res) => {
             const {fullname, username, emall, password} = req.body;
             //валидность адреса почты
             const emallRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
             if (! emallRegex.test(emall)) {
                 return res.status(400).json({error: 'Некорретно введен адрес почты'});
             }
@@ -32,7 +34,7 @@ export const sugnup = async (req, res) => {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            const newUser = new User ({
+            const newUser = new User({
                 fullname,
                 username,
                 emall,
@@ -64,15 +66,41 @@ export const sugnup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    res.json ({
-        data: "login endpoint",
-    });
+    try {
+        const {username, password} = req.body;
+        const user = await User.findOne({username});
+        const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
+
+        if(!user || !isPasswordCorrect) {
+            res.status(400).json({error: 'Некорректный логин или пароль'});
+        }
+
+        generateTokenAndSetCookie(user._id, res);
+        res.status(201).json({
+            _id: newUser._id,
+            fullname: user.fullname,
+            username: user.username,
+            emall: user.emall,
+            followers: user.followers,
+            following: user.following,
+            profileImg: user.profileImg,
+            coverImg: user.coverImg
+        });
+
+    } catch (error) {
+        console.log('Ошибка подключения к контролеру', error.message);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
 };
 
 export const logout = async (req, res) => {
-    res.json ({
-        data: "logout endpoint",
-    });
+    try {
+        res.cookie("jwt", "", {maxAge: 0});
+        res.status(200).json({message:'Вы вышли из системы'})
+    } catch (error) {
+        console.log('Ошибка при попытке выхода из системы', error.message);
+        req.status(500).json({errror:'Invalid Server Error'});
+    }
 };
 
 
