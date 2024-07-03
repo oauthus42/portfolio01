@@ -8,20 +8,24 @@ export const sugnup = async (req, res) => {
             //валидность адреса почты
             const emallRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (! emallRegex.test(emall)) {
-                return res.status(400).json({error: 'Некорретно введёт адрес почты'});
+                return res.status(400).json({error: 'Некорретно введен адрес почты'});
             }
 
             //ищем в таблице юзера
-            const existingUser = await User.findOne (username)
+            const existingUser = await User.findOne ({username});
             //если такое имя занято, то:
             if(existingUser) {
                 return res.status(400).json({error: 'Имя пользователя уже занято'});
             }
 
             //проверка адреса почты
-            const existingEmail = await User.findOne (emall)
+            const existingEmail = await User.findOne ({emall})
             if(existingEmail) {
                 return res.status(400).json({error: 'Такой е-mail уже существует'});
+            }
+
+            if(password.length < 6) {
+                return res.status(400).json({error: 'Пароль должен содержать не менее 6 символов'});
             }
 
             //хэширование пароля
@@ -29,14 +33,14 @@ export const sugnup = async (req, res) => {
             const hashedPassword = await bcrypt.hash(password, salt);
 
             const newUser = new User ({
-                fullname: fullname,
-                username: username,
-                emall: emall,
+                fullname,
+                username,
+                emall,
                 password: hashedPassword
-            })
+            });
 
             if(newUser) {
-                generateTokenAndSetCookie(newUser._id, res)
+                generateTokenAndSetCookie(newUser._id, res);
                 await newUser.save();
 
                 res.status(201).json({
@@ -47,15 +51,14 @@ export const sugnup = async (req, res) => {
                     followers: newUser.followers,
                     following: newUser.following,
                     profileImg: newUser.profileImg,
-                    coverImg: newUser.coverImg,
-                    bio: newUser.bio
-                })
+                    coverImg: newUser.coverImg
+                });
             } else {
                 res.status(400).json({error: 'Некорректные данные пользователя'});
             }
 
         } catch (error) {
-            console.log('Ошибка при регистрации', error.message)
+            console.log('Ошибка при регистрации', error.message);
             res.status(500).json({error: 'Internal Server Error'});
         }
 };
