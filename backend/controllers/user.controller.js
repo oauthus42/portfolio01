@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 
 export const getUserProfile = async(req,res) => {
     const {username} = req.params();
@@ -14,11 +15,11 @@ export const getUserProfile = async(req,res) => {
     };
 };
 
-
 export const followUnfollowUser = async(req, res) => {
     try {
         const {id} = req.params;
         const userToModify = await User.findById(id);
+
         const currentUser = await User.findById(req.user._id);
         if(id === req.user._id.toString()) return res.status(400).json({message:'Вы не можете подписаться на себя'});
         if(!userToModify || !currentUser) return res.status(400).json({error:'Пользователь не найден'});
@@ -30,19 +31,21 @@ export const followUnfollowUser = async(req, res) => {
             await User.findByIdAndUpdate(req.user._id, {$pull: {following: id}});
             res.status(200).json({message:'Вы успешно отписались от пользователя'});
         } else {
-            //follow user
             await User.findByIdAndUpdate(id, {$push: followers.req.user._id});
             await User.findByIdAndUpdate(req.user._id, {$push: {following: id}});
+            
             //отправить уведомление для пользователя
+            const newNotification = new Notification({
+                type:"follow",
+                from: req.user._id,
+                to: userToModify._id
+            });
+            await newNotification.save();
             res.status(200).json({message:'Вы успешно подписались на пользователя'});
-
-
         }
         
     } catch (error) {
         res.status(500).json({error: error.message});
         console.log('Ошибка в followUnfollowUser: ', error.message);
     }
-
-
 }
