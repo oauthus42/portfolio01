@@ -99,7 +99,17 @@ export const logout = async (req, res) => {
         res.status(200).json({message:'Вы вышли из системы'})
     } catch (error) {
         console.log('Ошибка при попытке выхода из системы', error.message);
-        req.status(500).json({errror:'Invalid Server Error'});
+        req.status(500).json({error:'Internal Server Error'});
+    }
+};
+
+export const getMe = async (req, res) => {
+    try {
+        const user = await User.findById(res.user._id).select("-password");
+        res.status(200).json(user);
+    } catch (error) {
+        console.log('Ошибка в getMe controller', error.message);
+        res.status(500).json({error:'Internal Server Error'});
     }
 };
 
