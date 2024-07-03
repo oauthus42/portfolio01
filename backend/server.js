@@ -10,7 +10,8 @@ console.log(process.env.mongoURI);
 const PORT = process.env.PORT || 5000;
 
 //чтобы разобрать тело запроса
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 app.use("/api/auth", authRoutes);
 app.listen(8000, () => {
