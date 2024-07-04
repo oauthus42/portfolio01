@@ -19,7 +19,7 @@ export const followUnfollowUser = async(req, res) => {
     try {
         const {id} = req.params;
         const userToModify = await User.findById(id);
-
+        
         const currentUser = await User.findById(req.user._id);
         if(id === req.user._id.toString()) return res.status(400).json({message:'Вы не можете подписаться на себя'});
         if(!userToModify || !currentUser) return res.status(400).json({error:'Пользователь не найден'});
@@ -43,9 +43,36 @@ export const followUnfollowUser = async(req, res) => {
             await newNotification.save();
             res.status(200).json({message:'Вы успешно подписались на пользователя'});
         }
-        
+
     } catch (error) {
         res.status(500).json({error: error.message});
         console.log('Ошибка в followUnfollowUser: ', error.message);
+    }
+}
+
+export const getSuggestedUser = async(req, res) => {
+    try {
+        const userId = req.user._id;
+        
+
+        const userFollowedByMe = await User.findById(userId).select("following");
+
+        const users = await User.aggregate([
+            {
+                $match:{
+                    _id: {$ne:userId}
+                }
+            },
+            {$sample:{size:10}}
+        ])
+
+        const filteredUsers = users.filter(user => !userFollowedByMe.following.includes(user._id));
+        const suggestedUser = filteredUsers.slice(0,4);
+        suggestedUser.forEach(user => user.password = null);
+
+        res.status(200).json(suggestedUser);
+    } catch (error) {
+        console.log('Ошибка в getSuggestedUser: ', error.message);
+        res.status(500).json({error: error.message});
     }
 }
