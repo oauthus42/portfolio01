@@ -1,3 +1,6 @@
+import bcrypt from 'bcryptjs';
+import { v2 as cloudinary } from 'cloudinary';
+//модели
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 
@@ -48,7 +51,7 @@ export const followUnfollowUser = async(req, res) => {
         res.status(500).json({error: error.message});
         console.log('Ошибка в followUnfollowUser: ', error.message);
     }
-}
+};
 
 export const getSuggestedUser = async(req, res) => {
     try {
@@ -75,4 +78,67 @@ export const getSuggestedUser = async(req, res) => {
         console.log('Ошибка в getSuggestedUser: ', error.message);
         res.status(500).json({error: error.message});
     }
+};
+
+export const updateUser = async(req, res) => {
+    const {fullname, email, username, currentPassword, newPassword, bio, link} = req.body;
+    let {profileImg, coverImg} = req.body;
+
+    const userId = req.user._id;
+
+    try {
+        const user = await User.findById(userId);
+        if(!user) return res.status(404).json({message:'Пользователь не найден'});
+
+        if((!newPassword && currentPassword) || (newPassword && !currentPassword)){
+            return res.status(400).json({message:'Пожалуйста, введите старый пароль и новый'});
+        }
+
+        if(currentPassword && newPassword){
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if(!isMatch) return res.status(400).json({message:'Текущий пароль неверен'});
+            if(newPassword.length < 6) {
+                return res.status(400).json({message:'Длина пароля должна быть не менее 6 символов'});
+            }
+            //хэширование нового пароля
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(newPassword, salt);
+        }
+
+        if(profileImg) {
+            if(user.profileImg){
+                //если фото уже есть, то его надо удалить, т.к. на бесплатном тарифе ограничен размер
+                await cloudinary.uploader.destroy(user.profileImg.split("/").pop().split(".")[0]);
+            }
+            //загрузка нового фото
+            const uploaderResponse = await cloudinary.uploader.upload(profileImg);
+            profileImg = uploaderResponse.secure_url;
+        }
+
+        if(coverImg) {
+            if(user.coverImg){
+                await cloudinary.uploader.destroy(user.coverImg.split("/").pop().split(".")[0]);
+            }
+            const uploaderResponse = await cloudinary.uploader.upload(coverImg);
+            coverImg = uploaderResponse.secure_url;
+        }
+
+        user.fullname = fullname || user.fullname;
+        user.email = email || user.email;
+        user.username = username || user.username;
+        user.bio = bio || user.bio;
+        user.link = link || user.link;
+        user.profileImg = profileImg || user.profileImg;
+        user.coverImg = coverImg || user.coverImg;
+
+        user = await user.save();
+        //пароль должен быть занулен в респонсе
+        user.password = null;
+        return res.status(200).json(user);
+
+    } catch (error) {
+        
+
+
+    } 
 }
