@@ -49,7 +49,14 @@ const userSchema = new mongoose.Schema({//уточнить
     link: {
         type: String,
         default: ""
-    }
+    },
+    likedPosts: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Post',
+            default: []
+        }
+    ]
 }, {timeStamps: true});
 
 //создание пользовательской модели

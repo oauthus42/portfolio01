@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import {v2 as cloudinary} from 'cloudinary';
 import { populate } from "dotenv";
+import { trusted } from "mongoose";
 
 export const createPost = async(req, res) => {
     try {
@@ -90,10 +91,12 @@ export const likeUnlikePost = async(req, res) => {
         if(!userLikedPost){
             //дизлайк
             await Post.updateOne({_id: postId}, {$pull: {likes: userId}});
+            await User.updateOne({_id: userId}, {$pull: {likedPosts: postId}});
             res.status(200).json({message:'Ваш лайк удален с поста'});
         } else {
             //лайк
             post.likes.push(userId);
+            await User.updateOne({_id: userId}, {$push: {likedPosts: postId}});
             await post.save();
 
             const notification = new Notification({
@@ -128,4 +131,25 @@ export const getAllPost = async(req, res) => {
         console.log('Ошибка в getAllPost (post.controller): ', error);
         res.status(500).json({message:'Internal Server Error'});
     };
+};
+
+export const getLikePosts = async(req, res) => {
+    const userId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if(!user) return res.status(404).json({message:'Пользователь не найден'});
+
+        const likedPosts = await Post.find({_id: {$in: user.likedPosts}}).populate({
+            path:'user',
+            select: '-password'
+        }).populate({
+            path:'comments.user',
+            select:'-password'
+        });
+
+        res.status(200).json(likedPosts);
+    } catch (error) {
+        console.log('Ошибка в getLikePosts (post.controller): ', error);
+        res.status(500).json({message:'Internal Server Error'});
+    }
 };
