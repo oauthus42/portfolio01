@@ -87,7 +87,7 @@ export const updateUser = async(req, res) => {
     const userId = req.user._id;
 
     try {
-        const user = await User.findById(userId);
+        let user = await User.findById(userId);
         if(!user) return res.status(404).json({message:'Пользователь не найден'});
 
         if((!newPassword && currentPassword) || (newPassword && !currentPassword)){
@@ -137,8 +137,7 @@ export const updateUser = async(req, res) => {
         return res.status(200).json(user);
 
     } catch (error) {
-        
-
-
-    } 
+        console.log("Ошибка в updateUser", error.message);
+        res.status(500).json({error: error.message});
+    };
 }
