@@ -2,6 +2,7 @@ import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import {v2 as cloudinary} from 'cloudinary';
+import { populate } from "dotenv";
 
 export const createPost = async(req, res) => {
     try {
@@ -73,7 +74,7 @@ export const commentOnPost = async(req, res) => {
         await post.save();
         res.status(200).json(post);
     } catch (error) {
-        console.log('Ошибка в commentOnPost (post.controller) ', error);
+        console.log('Ошибка в commentOnPost (post.controller): ', error);
         res.status(500).json({message:'Internal Server Error'});
     }
 };
@@ -105,7 +106,26 @@ export const likeUnlikePost = async(req, res) => {
             res.status(200).json({message:'Ваш лайк поставлен на пост'});
         }
     } catch (error) {
-        console.log('Ошибка в likeUnlikePost (post.controller) ', error);
+        console.log('Ошибка в likeUnlikePost (post.controller): ', error);
+        res.status(500).json({message:'Internal Server Error'});
+    };
+};
+
+export const getAllPost = async(req, res) => {
+    try {
+        const posts = await Post.find().sort({createdAt: -1}).populate({
+            path: 'user',
+            select: '-password'
+        })
+        populate({
+            path: 'comments.user',
+            select: '-password'
+        });
+        
+        if(posts.length === 0) return res.status(200).json([]);
+        res.status(200).json(posts);
+    } catch (error) {
+        console.log('Ошибка в getAllPost (post.controller): ', error);
         res.status(500).json({message:'Internal Server Error'});
     };
 };
