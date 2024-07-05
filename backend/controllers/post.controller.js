@@ -75,7 +75,7 @@ export const commentOnPost = async(req, res) => {
         await post.save();
         res.status(200).json(post);
     } catch (error) {
-        console.log('Ошибка в commentOnPost (post.controller): ', error);
+        console.log('Ошибка в commentOnPost (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     }
 };
@@ -109,7 +109,7 @@ export const likeUnlikePost = async(req, res) => {
             res.status(200).json({message:'Ваш лайк поставлен на пост'});
         }
     } catch (error) {
-        console.log('Ошибка в likeUnlikePost (post.controller): ', error);
+        console.log('Ошибка в likeUnlikePost (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     };
 };
@@ -128,7 +128,7 @@ export const getAllPost = async(req, res) => {
         if(posts.length === 0) return res.status(200).json([]);
         res.status(200).json(posts);
     } catch (error) {
-        console.log('Ошибка в getAllPost (post.controller): ', error);
+        console.log('Ошибка в getAllPost (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     };
 };
@@ -149,7 +149,7 @@ export const getLikePosts = async(req, res) => {
 
         res.status(200).json(likedPosts);
     } catch (error) {
-        console.log('Ошибка в getLikePosts (post.controller): ', error);
+        console.log('Ошибка в getLikePosts (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     };
 };
@@ -171,7 +171,7 @@ export const getFollowingPost = async(req, res) => {
 
         res.status(200).json(feedPosts);
     } catch (error) {
-        console.log('Ошибка в getFollowingPost (post.controller): ', error);
+        console.log('Ошибка в getFollowingPost (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     };
 };
@@ -193,7 +193,7 @@ export const getUserPosts = async(req,res) => {
         res.status(200).json(posts);
         
     } catch (error) {
-        console.log('Ошибка в getUserPosts (post.controller): ', error);
+        console.log('Ошибка в getUserPosts (post.controller): ', error.message);
         res.status(500).json({message:'Internal Server Error'});
     }
 };
