@@ -1,7 +1,14 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-import Svg from '../../../components/svg/Svg';
+import Svg from "../../../components/svg/Svg";
+
+import { MdOutlineMail } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
+import { MdPassword } from "react-icons/md";
+import { MdDriveFileRenameOutline } from "react-icons/md";
+//import { useMutation, useQueryClient } from "@tanstack/react-query";
+//import toast from "react-hot-toast";
 
 
 const Signup = () => {
