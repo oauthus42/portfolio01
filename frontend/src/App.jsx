@@ -4,6 +4,7 @@ import Login from './pages/auth/login/Login';
 import Home from './pages/home/Home';
 import Signup from './pages/auth/signup/Signup';
 import Sidebar from './components/common/Sidebar';
+import RightPanel from './components/common/RightPanel';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path='/notifications' element={<Notification />}/>
         <Route path='/profile/:username' element={<Profile />}/>
       </Routes>
+      <RightPanel />
     </div>
   )
   };
