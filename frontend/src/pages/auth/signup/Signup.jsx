@@ -33,7 +33,7 @@ const Signup = () => {
 				});
 
 				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || "Failed to create account");
+				if (!res.ok) throw new Error(data.error || "Ошибка создания аккаунта");
 				console.log(data);
 				return data;
 			} catch (error) {
@@ -43,7 +43,7 @@ const Signup = () => {
 		},
 
         onSuccess: () => {
-			toast.success("Account created successfully");
+			toast.success("Аккаунт успешно создан");
 			queryClient.invalidateQueries({ queryKey: ["authUser"] });
 		},
     });
@@ -118,9 +118,9 @@ const Signup = () => {
                         {isError && <p className='text-red-500'>{error.message}</p>}
                     </form>
                     <div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
-                        <p className='text-white text-lg'>Already have an account?</p>
+                        <p className='text-white text-lg'>У меня уже есть аккаунт</p>
                         <Link to='/login'>
-                            <button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign in</button>
+                            <button className='btn rounded-full btn-primary text-white btn-outline w-full'>Зарегистрироваться</button>
                         </Link>
                     </div>
                 </div>
