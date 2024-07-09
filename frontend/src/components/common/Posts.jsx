@@ -51,13 +51,10 @@ const Posts = ({ feedType, username, userId }) => {
 		<>
 			{(isLoading || isRefetching) && (
 				<div className='flex flex-col justify-center'>
-					<PostSkeleton />
-					<PostSkeleton />
-					<PostSkeleton />
 				</div>
 			)}
 			{!isLoading && !isRefetching && posts?.length === 0 && (
-				<p className='text-center my-4'>No posts in this tab. Switch 👻</p>
+				<p className='text-center my-4'>В этой вкладке нет постов. Переключить</p>
 			)}
 			{!isLoading && !isRefetching && posts && (
 				<div>
