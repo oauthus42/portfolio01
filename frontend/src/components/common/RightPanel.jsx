@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { USERS_FOR_RIGHT_PANEL } from "../../../utils/db/dummy";
-//добавить импорт хука useFollow 
-//import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
+//добавить импорт хука useFollow S
 
 const RightPanel = () => {
 	const { data: suggestedUsers, isLoading } = useQuery({
